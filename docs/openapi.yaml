@@ -1,0 +1,105 @@
+openapi: 3.0.3
+info:
+  title: API de Transacciones
+  version: 1.0.0
+  description: API de ejercicio para autenticacion, cuentas y transferencias.
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Auth
+  - name: Accounts
+  - name: Transactions
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+      responses:
+        "201": { description: Usuario creado }
+        "400": { description: Datos invalidos }
+        "409": { description: Email duplicado }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200": { description: Token JWT }
+        "401": { description: Credenciales invalidas }
+  /accounts/me:
+    get:
+      tags: [Accounts]
+      security: [{ bearerAuth: [] }]
+      summary: Listar cuentas del usuario autenticado
+      responses:
+        "200": { description: Listado de cuentas }
+        "401": { description: Token invalido o ausente }
+  /accounts/{id}:
+    get:
+      tags: [Accounts]
+      security: [{ bearerAuth: [] }]
+      summary: Obtener una cuenta del usuario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: Cuenta encontrada }
+        "404": { description: Cuenta no encontrada }
+  /transactions:
+    post:
+      tags: [Transactions]
+      security: [{ bearerAuth: [] }]
+      summary: Transferir dinero entre cuentas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fromAccountId, toAccountId, amount]
+              properties:
+                fromAccountId: { type: integer }
+                toAccountId: { type: integer }
+                amount: { type: number, minimum: 0.01 }
+                note: { type: string }
+      responses:
+        "201": { description: Transferencia creada }
+        "400": { description: Datos invalidos }
+        "403": { description: Cuenta origen no autorizada }
+        "404": { description: Cuenta no encontrada }
+        "409": { description: Saldo insuficiente }
+  /transactions/me:
+    get:
+      tags: [Transactions]
+      security: [{ bearerAuth: [] }]
+      summary: Historial de transacciones creadas por el usuario
+      responses:
+        "200": { description: Listado de transacciones }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
