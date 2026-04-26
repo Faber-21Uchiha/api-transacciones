@@ -65,7 +65,13 @@ Primero debes hacer login para obtener el token.
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI...",
+  "user": {
+    "id": 15,
+    "name": "FABER ALEMAN",
+    "email": "faber_aleman@cun.edu.co",
+    "role": "USER"
+  }
 }
 ```
 
@@ -105,12 +111,23 @@ Primero debes hacer login para obtener el token.
 
 ```json
 {
-  "id": 8,
-  "fromAccountId": 15,
-  "toAccountId": 1,
-  "amount": "120",
+  "transactionId": 8,
+  "amountSent": 120,
+  "fromAccount": {
+    "id": 15,
+    "number": "ACC-2026-0015",
+    "ownerName": "FABER ALEMAN",
+    "balanceBefore": 6500,
+    "balanceAfter": 6380
+  },
+  "toAccount": {
+    "id": 1,
+    "number": "ACC-2026-0001",
+    "ownerName": "YURY MARCELA BASILIO SANTOS",
+    "balanceBefore": 5200,
+    "balanceAfter": 5320
+  },
   "note": "Pago de prueba",
-  "createdById": 15,
   "createdAt": "2026-04-26T15:15:10.000Z"
 }
 ```
@@ -168,7 +185,20 @@ Primero debes hacer login para obtener el token.
 4. **Token invalido:** enviar token alterado (`401`)
 5. **Cuenta no propia:** usar `fromAccountId` de otro usuario (`403`)
 
-## 8) Recursos de documentacion
+## 8) Endpoints de administrador
+
+Solo usuarios con rol `ADMIN` pueden usar:
+
+- `GET /admin/users`: lista todos los usuarios y sus cuentas.
+- `GET /admin/accounts`: lista todas las cuentas con su propietario.
+- `GET /admin/transactions`: lista global de transferencias.
+
+Admin seed por defecto:
+
+- `email`: `admin@cun.edu.co`
+- `password`: `Admin2026*`
+
+## 9) Recursos de documentacion
 
 - Contrato OpenAPI: `docs/openapi.yaml`
 - Coleccion Postman: `docs/postman_collection.json`

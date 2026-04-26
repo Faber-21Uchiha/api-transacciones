@@ -34,7 +34,9 @@ const transferPlan = [
 
 async function main() {
   const defaultPassword = "Cun2026*";
+  const adminPassword = "Admin2026*";
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
 
   // Limpieza para poder re-ejecutar seed sin errores.
   await prisma.transaction.deleteMany();
@@ -50,7 +52,8 @@ async function main() {
       data: {
         name: student.name,
         email: student.email,
-        passwordHash
+        passwordHash,
+        role: "USER"
       }
     });
 
@@ -65,6 +68,15 @@ async function main() {
     createdUsers.push(user);
     createdAccounts.push(account);
   }
+
+  const adminUser = await prisma.user.create({
+    data: {
+      name: "ADMIN GENERAL",
+      email: "admin@cun.edu.co",
+      passwordHash: adminPasswordHash,
+      role: "ADMIN"
+    }
+  });
 
   for (const movement of transferPlan) {
     const fromAccount = createdAccounts[movement.from];
@@ -93,8 +105,9 @@ async function main() {
   }
 
   console.log("Seed completado.");
-  console.log(`Usuarios creados: ${createdUsers.length}`);
+  console.log(`Usuarios creados: ${createdUsers.length + 1}`);
   console.log(`Contrasena temporal para todos: ${defaultPassword}`);
+  console.log(`Admin creado: ${adminUser.email} / ${adminPassword}`);
 }
 
 main()

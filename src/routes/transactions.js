@@ -13,8 +13,14 @@ router.post("/", requireAuth, async (req, res) => {
   }
 
   const [fromAccount, toAccount] = await Promise.all([
-    prisma.account.findUnique({ where: { id: Number(fromAccountId) } }),
-    prisma.account.findUnique({ where: { id: Number(toAccountId) } })
+    prisma.account.findUnique({
+      where: { id: Number(fromAccountId) },
+      include: { user: { select: { id: true, name: true, email: true } } }
+    }),
+    prisma.account.findUnique({
+      where: { id: Number(toAccountId) },
+      include: { user: { select: { id: true, name: true, email: true } } }
+    })
   ]);
 
   if (!fromAccount || !toAccount) {
@@ -28,15 +34,15 @@ router.post("/", requireAuth, async (req, res) => {
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    await tx.account.update({
+    const updatedFrom = await tx.account.update({
       where: { id: fromAccount.id },
       data: { balance: { decrement: numAmount } }
     });
-    await tx.account.update({
+    const updatedTo = await tx.account.update({
       where: { id: toAccount.id },
       data: { balance: { increment: numAmount } }
     });
-    return tx.transaction.create({
+    const transaction = await tx.transaction.create({
       data: {
         fromAccountId: fromAccount.id,
         toAccountId: toAccount.id,
@@ -45,9 +51,29 @@ router.post("/", requireAuth, async (req, res) => {
         createdById: req.user.id
       }
     });
+    return { transaction, updatedFrom, updatedTo };
   });
 
-  return res.status(201).json(result);
+  return res.status(201).json({
+    transactionId: result.transaction.id,
+    amountSent: numAmount,
+    fromAccount: {
+      id: fromAccount.id,
+      number: fromAccount.number,
+      ownerName: fromAccount.user.name,
+      balanceBefore: Number(fromAccount.balance),
+      balanceAfter: Number(result.updatedFrom.balance)
+    },
+    toAccount: {
+      id: toAccount.id,
+      number: toAccount.number,
+      ownerName: toAccount.user.name,
+      balanceBefore: Number(toAccount.balance),
+      balanceAfter: Number(result.updatedTo.balance)
+    },
+    note: result.transaction.note,
+    createdAt: result.transaction.createdAt
+  });
 });
 
 router.get("/me", requireAuth, async (req, res) => {

@@ -16,14 +16,14 @@ router.post("/register", async (req, res) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name, email, passwordHash }
+    data: { name, email, passwordHash, role: "USER" }
   });
 
   await prisma.account.create({
     data: { userId: user.id, number: `ACC-${Date.now()}-${user.id}`, balance: 1000 }
   });
 
-  return res.status(201).json({ id: user.id, name: user.name, email: user.email });
+  return res.status(201).json({ id: user.id, name: user.name, email: user.email, role: user.role });
 });
 
 router.post("/login", async (req, res) => {
@@ -35,12 +35,12 @@ router.post("/login", async (req, res) => {
   if (!ok) return res.status(401).json({ error: "Credenciales invalidas" });
 
   const token = jwt.sign(
-    { id: user.id, email: user.email, name: user.name },
+    { id: user.id, email: user.email, name: user.name, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "8h" }
   );
 
-  return res.json({ token });
+  return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
 
 export default router;

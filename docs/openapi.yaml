@@ -9,6 +9,7 @@ tags:
   - name: Auth
   - name: Accounts
   - name: Transactions
+  - name: Admin
 paths:
   /auth/register:
     post:
@@ -97,6 +98,30 @@ paths:
       summary: Historial de transacciones creadas por el usuario
       responses:
         "200": { description: Listado de transacciones }
+  /admin/users:
+    get:
+      tags: [Admin]
+      security: [{ bearerAuth: [] }]
+      summary: Listar todos los usuarios (solo ADMIN)
+      responses:
+        "200": { description: Listado global de usuarios }
+        "403": { description: Acceso solo para administradores }
+  /admin/accounts:
+    get:
+      tags: [Admin]
+      security: [{ bearerAuth: [] }]
+      summary: Listar todas las cuentas (solo ADMIN)
+      responses:
+        "200": { description: Listado global de cuentas }
+        "403": { description: Acceso solo para administradores }
+  /admin/transactions:
+    get:
+      tags: [Admin]
+      security: [{ bearerAuth: [] }]
+      summary: Listar todas las transacciones (solo ADMIN)
+      responses:
+        "200": { description: Listado global de transacciones }
+        "403": { description: Acceso solo para administradores }
 components:
   securitySchemes:
     bearerAuth:

@@ -12,6 +12,7 @@ model User {
   name         String
   email        String        @unique
   passwordHash String
+  role         String        @default("USER")
   accounts     Account[]
   createdAt    DateTime      @default(now())
   transactions Transaction[] @relation("CreatedBy")
