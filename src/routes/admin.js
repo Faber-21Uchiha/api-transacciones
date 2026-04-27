@@ -78,7 +78,7 @@ router.post("/users/:id/reset-password", async (req, res) => {
   }
 
   const target = await prisma.user.findUnique({ where: { id: userId } });
-  if (!target) return res.status(404).json({ error: "Usuario no encontrado" });
+  if (!target) return res.status(404).json({ error: "cuenta destino no existe." });
 
   const hash = await bcrypt.hash(temporaryPassword, 10);
   await prisma.user.update({

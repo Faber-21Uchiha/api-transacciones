@@ -24,13 +24,13 @@ router.post("/", requireAuth, async (req, res) => {
   ]);
 
   if (!fromAccount || !toAccount) {
-    return res.status(404).json({ error: "Cuenta origen o destino no existe" });
+    return res.status(404).json({ error: "cuenta destino no existe." });
   }
   if (fromAccount.userId !== req.user.id) {
-    return res.status(403).json({ error: "La cuenta origen no pertenece al usuario" });
+    return res.status(403).json({ error: "intentas transferir desde una cuenta que no es tuya." });
   }
   if (Number(fromAccount.balance) < numAmount) {
-    return res.status(409).json({ error: "Saldo insuficiente" });
+    return res.status(409).json({ error: "saldo insuficiente." });
   }
 
   const result = await prisma.$transaction(async (tx) => {

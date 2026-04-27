@@ -30,10 +30,10 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return res.status(401).json({ error: "Credenciales invalidas" });
+  if (!user) return res.status(401).json({ error: "token invalido o credenciales incorrectas." });
 
   const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Credenciales invalidas" });
+  if (!ok) return res.status(401).json({ error: "token invalido o credenciales incorrectas." });
 
   await prisma.user.update({
     where: { id: user.id },
@@ -66,16 +66,16 @@ router.post("/change-password", requireAuth, async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-  if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+  if (!user) return res.status(404).json({ error: "cuenta destino no existe." });
 
   const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
   if (!isCurrentValid) {
-    return res.status(401).json({ error: "Contrasena actual incorrecta" });
+    return res.status(401).json({ error: "token invalido o credenciales incorrectas." });
   }
 
   const samePassword = await bcrypt.compare(newPassword, user.passwordHash);
   if (samePassword) {
-    return res.status(409).json({ error: "La nueva contrasena debe ser diferente a la actual" });
+    return res.status(409).json({ error: "saldo insuficiente." });
   }
 
   const newHash = await bcrypt.hash(newPassword, 10);
