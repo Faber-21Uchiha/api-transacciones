@@ -90,6 +90,39 @@
               }
             }
           ]
+        },
+        {
+          "name": "Cambiar contrasena (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/change-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{faberPassword}}\",\n  \"newPassword\": \"{{faberNewPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('faberPassword', pm.collectionVariables.get('faberNewPassword'));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -479,6 +512,38 @@
               }
             }
           ]
+        },
+        {
+          "name": "Admin - Reset password temporal (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users/{{faberUserId}}/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"temporaryPassword\": \"{{faberTempPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
@@ -495,6 +560,18 @@
     {
       "key": "faberPassword",
       "value": "Cun2026*"
+    },
+    {
+      "key": "faberNewPassword",
+      "value": "Cun2026*Nueva"
+    },
+    {
+      "key": "faberTempPassword",
+      "value": "Temporal2026*"
+    },
+    {
+      "key": "faberUserId",
+      "value": "15"
     },
     {
       "key": "token",

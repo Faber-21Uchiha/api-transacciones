@@ -1,4 +1,5 @@
 import { Router } from "express";
+import bcrypt from "bcryptjs";
 import { prisma } from "../db.js";
 import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
@@ -13,7 +14,9 @@ router.get("/users", async (_req, res) => {
       name: true,
       email: true,
       role: true,
+      mustChangePassword: true,
       passwordChangedAt: true,
+      lastLoginAt: true,
       createdAt: true,
       accounts: {
         select: { id: true, number: true, balance: true, createdAt: true }
@@ -64,6 +67,34 @@ router.get("/transactions", async (_req, res) => {
     }
   });
   return res.json(transactions);
+});
+
+router.post("/users/:id/reset-password", async (req, res) => {
+  const userId = Number(req.params.id);
+  const { temporaryPassword } = req.body;
+
+  if (!Number.isInteger(userId) || userId <= 0 || !temporaryPassword || temporaryPassword.length < 6) {
+    return res.status(400).json({ error: "Datos invalidos para reset de contrasena" });
+  }
+
+  const target = await prisma.user.findUnique({ where: { id: userId } });
+  if (!target) return res.status(404).json({ error: "Usuario no encontrado" });
+
+  const hash = await bcrypt.hash(temporaryPassword, 10);
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      passwordHash: hash,
+      mustChangePassword: true
+    }
+  });
+
+  return res.json({
+    message: "Contrasena temporal aplicada",
+    userId,
+    email: target.email,
+    mustChangePassword: true
+  });
 });
 
 export default router;

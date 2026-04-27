@@ -142,6 +142,30 @@ paths:
       responses:
         "200": { description: Listado global de transacciones }
         "403": { description: Acceso solo para administradores }
+  /admin/users/{id}/reset-password:
+    post:
+      tags: [Admin]
+      security: [{ bearerAuth: [] }]
+      summary: Resetear contrasena de usuario con clave temporal (solo ADMIN)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [temporaryPassword]
+              properties:
+                temporaryPassword: { type: string, minLength: 6 }
+      responses:
+        "200": { description: Contrasena temporal aplicada y forzar cambio en proximo login }
+        "400": { description: Datos invalidos }
+        "403": { description: Acceso solo para administradores }
+        "404": { description: Usuario no encontrado }
 components:
   securitySchemes:
     bearerAuth:

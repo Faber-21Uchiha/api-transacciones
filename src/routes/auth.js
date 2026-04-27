@@ -35,13 +35,28 @@ router.post("/login", async (req, res) => {
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: "Credenciales invalidas" });
 
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() }
+  });
+
   const token = jwt.sign(
     { id: user.id, email: user.email, name: user.name, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "8h" }
   );
 
-  return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  return res.json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      mustChangePassword: user.mustChangePassword,
+      passwordChangedAt: user.passwordChangedAt
+    }
+  });
 });
 
 router.post("/change-password", requireAuth, async (req, res) => {
@@ -66,7 +81,7 @@ router.post("/change-password", requireAuth, async (req, res) => {
   const newHash = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({
     where: { id: user.id },
-    data: { passwordHash: newHash, passwordChangedAt: new Date() }
+    data: { passwordHash: newHash, passwordChangedAt: new Date(), mustChangePassword: false }
   });
 
   return res.json({ message: "Contrasena actualizada correctamente" });

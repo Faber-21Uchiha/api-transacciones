@@ -71,7 +71,9 @@ Primero debes hacer login para obtener el token.
     "id": 15,
     "name": "FABER ALEMAN",
     "email": "faber_aleman@cun.edu.co",
-    "role": "USER"
+    "role": "USER",
+    "mustChangePassword": false,
+    "passwordChangedAt": "2026-04-26T20:35:00.000Z"
   }
 }
 ```
@@ -212,7 +214,8 @@ Primero debes hacer login para obtener el token.
 Solo usuarios con rol `ADMIN` pueden usar:
 
 - `GET /admin/users`: lista todos los usuarios y sus cuentas.
-  - Incluye `passwordChangedAt` para verificar quien ya cambio su contrasena.
+  - Incluye `passwordChangedAt`, `mustChangePassword` y `lastLoginAt`.
+- `POST /admin/users/{id}/reset-password`: asigna clave temporal y obliga cambio en el siguiente login.
 - `GET /admin/accounts`: lista todas las cuentas con su propietario.
 - `GET /admin/transactions`: lista global de transferencias.
 
