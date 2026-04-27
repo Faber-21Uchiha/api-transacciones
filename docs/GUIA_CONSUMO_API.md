@@ -19,10 +19,11 @@ Primero debes hacer login para obtener el token.
 
 1. Registrar usuario (`POST /auth/register`) o usar uno existente.
 2. Iniciar sesion (`POST /auth/login`) y guardar `token`.
-3. Consultar cuentas (`GET /accounts/me`) para obtener `fromAccountId`.
-4. Obtener cuenta destino (de otro usuario) para `toAccountId`.
-5. Ejecutar transferencia (`POST /transactions`).
-6. Consultar historial (`GET /transactions/me`).
+3. Opcional: cambiar contrasena (`POST /auth/change-password`).
+4. Consultar cuentas (`GET /accounts/me`) para obtener `fromAccountId`.
+5. Obtener cuenta destino (de otro usuario) para `toAccountId`.
+6. Ejecutar transferencia (`POST /transactions`).
+7. Consultar historial (`GET /transactions/me`).
 
 ## 4) Endpoints con ejemplos
 
@@ -152,6 +153,27 @@ Primero debes hacer login para obtener el token.
 ]
 ```
 
+### 4.6 Cambiar contrasena
+
+- **Metodo:** `POST /auth/change-password`
+- **Header:** `Authorization: Bearer <token>`
+- **Body:**
+
+```json
+{
+  "currentPassword": "Cun2026*",
+  "newPassword": "Cun2026*Nueva"
+}
+```
+
+- **Respuesta esperada:** `200`
+
+```json
+{
+  "message": "Contrasena actualizada correctamente"
+}
+```
+
 ## 5) Reglas de negocio de transferencias
 
 - El usuario debe estar autenticado.
@@ -190,6 +212,7 @@ Primero debes hacer login para obtener el token.
 Solo usuarios con rol `ADMIN` pueden usar:
 
 - `GET /admin/users`: lista todos los usuarios y sus cuentas.
+  - Incluye `passwordChangedAt` para verificar quien ya cambio su contrasena.
 - `GET /admin/accounts`: lista todas las cuentas con su propietario.
 - `GET /admin/transactions`: lista global de transferencias.
 

@@ -13,6 +13,7 @@ router.get("/users", async (_req, res) => {
       name: true,
       email: true,
       role: true,
+      passwordChangedAt: true,
       createdAt: true,
       accounts: {
         select: { id: true, number: true, balance: true, createdAt: true }

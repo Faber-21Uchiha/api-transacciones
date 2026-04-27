@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../db.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -41,6 +42,34 @@ router.post("/login", async (req, res) => {
   );
 
   return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+});
+
+router.post("/change-password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: "Datos invalidos para cambio de contrasena" });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+  const isCurrentValid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isCurrentValid) {
+    return res.status(401).json({ error: "Contrasena actual incorrecta" });
+  }
+
+  const samePassword = await bcrypt.compare(newPassword, user.passwordHash);
+  if (samePassword) {
+    return res.status(409).json({ error: "La nueva contrasena debe ser diferente a la actual" });
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: newHash, passwordChangedAt: new Date() }
+  });
+
+  return res.json({ message: "Contrasena actualizada correctamente" });
 });
 
 export default router;

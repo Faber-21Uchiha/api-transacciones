@@ -47,6 +47,26 @@ paths:
       responses:
         "200": { description: Token JWT }
         "401": { description: Credenciales invalidas }
+  /auth/change-password:
+    post:
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      summary: Cambiar contrasena del usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 6 }
+      responses:
+        "200": { description: Contrasena actualizada }
+        "400": { description: Datos invalidos }
+        "401": { description: Contrasena actual incorrecta o token invalido }
+        "409": { description: La nueva contrasena no puede ser igual a la actual }
   /accounts/me:
     get:
       tags: [Accounts]
